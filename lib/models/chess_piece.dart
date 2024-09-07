@@ -77,15 +77,14 @@ class ChessPiece {
       int x, int y, List<List<ChessPiece?>> board, List<List<int>> moves,
       [Map<String, dynamic>? options]) {
     int direction = (color == 'White') ? -1 : 1; // 흰색은 위로, 검은색은 아래로 이동
-    bool isFirstMove = !hasMoved;
 
     // 1칸 직진
     if (board[y + direction][x] == null) {
       moves.add([x, y + direction]);
     }
 
-    // 첫 이동 시 2칸 직진
-    if (isFirstMove &&
+    // 첫 이동 시 2칸 직진 (첫 이동 여부 확인)
+    if (!hasMoved &&
         board[y + direction * 2][x] == null &&
         board[y + direction][x] == null) {
       moves.add([x, y + direction * 2]);
