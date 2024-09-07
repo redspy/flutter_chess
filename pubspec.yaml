@@ -52,7 +52,19 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  assets:
+    - assets/black_pawn.png
+    - assets/black_rook.png
+    - assets/black_knight.png
+    - assets/black_bishop.png
+    - assets/black_queen.png
+    - assets/black_king.png
+    - assets/white_pawn.png
+    - assets/white_rook.png
+    - assets/white_knight.png
+    - assets/white_bishop.png
+    - assets/white_queen.png
+    - assets/white_king.png
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

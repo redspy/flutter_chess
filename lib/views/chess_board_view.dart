@@ -37,17 +37,13 @@ class ChessBoardView extends StatelessWidget {
                   ),
                   child: Center(
                     child: piece != null
-                        ? Text(
-                            piece.symbol,
-                            style: TextStyle(
-                              fontSize: 36,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal, // 선택된 말 강조
-                              color: piece.color == 'White'
-                                  ? Colors.black
-                                  : Colors.red, // 말 색상
-                            ),
+                        ? Image.asset(
+                            piece.imagePath, // 체스말 이미지를 표시
+                            width: 36,
+                            height: 36,
+                            color: isSelected
+                                ? Colors.blueAccent
+                                : null, // 선택된 말 강조
                           )
                         : Container(),
                   ),

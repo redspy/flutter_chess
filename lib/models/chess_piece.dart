@@ -4,37 +4,37 @@ class ChessPiece {
 
   ChessPiece(this.type, this.color);
 
-  // 체스 말 이모티콘 반환
-  String get symbol {
+  // 체스말 이미지 경로 반환
+  String get imagePath {
     if (color == 'White') {
       switch (type) {
         case 'King':
-          return '♔';
+          return 'assets/white_king.png';
         case 'Queen':
-          return '♕';
+          return 'assets/white_queen.png';
         case 'Rook':
-          return '♖';
+          return 'assets/white_rook.png';
         case 'Bishop':
-          return '♗';
+          return 'assets/white_bishop.png';
         case 'Knight':
-          return '♘';
+          return 'assets/white_knight.png';
         case 'Pawn':
-          return '♙';
+          return 'assets/white_pawn.png';
       }
     } else {
       switch (type) {
         case 'King':
-          return '♚';
+          return 'assets/black_king.png';
         case 'Queen':
-          return '♛';
+          return 'assets/black_queen.png';
         case 'Rook':
-          return '♜';
+          return 'assets/black_rook.png';
         case 'Bishop':
-          return '♝';
+          return 'assets/black_bishop.png';
         case 'Knight':
-          return '♞';
+          return 'assets/black_knight.png';
         case 'Pawn':
-          return '♟';
+          return 'assets/black_pawn.png';
       }
     }
     return '';
