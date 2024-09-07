@@ -32,9 +32,7 @@ class ChessBoard {
 
   // 말 이동 로직
   void movePiece(int fromX, int fromY, int toX, int toY) {
-    if (board[fromY][fromX] != null) {
-      board[toY][toX] = board[fromY][fromX];
-      board[fromY][fromX] = null;
-    }
+    board[toY][toX] = board[fromY][fromX];
+    board[fromY][fromX] = null;
   }
 }

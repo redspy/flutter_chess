@@ -7,6 +7,9 @@ class ChessGameController {
   int? selectedX;
   int? selectedY;
   List<List<int>> possibleMoves = [];
+  List<int>? enPassantTarget; // 앙파상 타겟 위치 추적
+  bool canCastleKingSide = false;
+  bool canCastleQueenSide = false;
 
   ChessGameController(this.chessBoard);
 
@@ -23,16 +26,32 @@ class ChessGameController {
       if (piece != null && piece.color == currentTurn) {
         selectedX = x;
         selectedY = y;
-        possibleMoves =
-            piece.getPossibleMoves(x, y, chessBoard.board); // 이동 가능 경로 계산
+        possibleMoves = piece.getPossibleMoves(x, y, chessBoard.board, {
+          'enPassant': enPassantTarget,
+          'canCastle': (piece.type == 'King' && !piece.hasMoved)
+        }); // 이동 가능 경로 계산
       }
     }
     // 선택된 말이 있는 상태에서, 이동 가능한 위치를 선택하면 말 이동
     else {
-      // 좌표 리스트를 비교하기 위해 명시적으로 비교
       for (List<int> move in possibleMoves) {
         if (move[0] == x && move[1] == y) {
           chessBoard.movePiece(selectedX!, selectedY!, x, y);
+
+          // 앙파상 타겟 설정 (폰이 두 칸 이동한 경우)
+          if (piece?.type == 'Pawn' && (selectedY! - y).abs() == 2) {
+            enPassantTarget = [x, y + ((currentTurn == 'White') ? 1 : -1)];
+          } else {
+            enPassantTarget = null;
+          }
+
+          // 킹과 룩의 첫 이동 후 캐슬링 가능 여부 업데이트
+          if (piece?.type == 'King') {
+            canCastleKingSide = false;
+            canCastleQueenSide = false;
+          }
+
+          piece?.hasMoved = true; // 첫 이동 여부 업데이트
           _clearSelection();
           currentTurn = (currentTurn == 'White') ? 'Black' : 'White'; // 턴 교체
           break;
