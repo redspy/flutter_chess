@@ -28,6 +28,11 @@ class _ChessGamePageState extends State<ChessGamePage> {
   @override
   void initState() {
     super.initState();
+    _initializeGame();
+  }
+
+  // 게임 초기화 함수
+  void _initializeGame() {
     chessBoard = ChessBoard();
     gameController = ChessGameController(chessBoard);
   }
@@ -37,6 +42,16 @@ class _ChessGamePageState extends State<ChessGamePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Flutter Chess'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              setState(() {
+                _initializeGame(); // 초기화 버튼을 누르면 게임을 다시 시작
+              });
+            },
+          ),
+        ],
       ),
       body: ChessBoardView(
         chessBoard: chessBoard,
