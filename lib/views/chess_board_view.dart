@@ -27,12 +27,18 @@ class ChessBoardView extends StatelessWidget {
               ChessPiece? piece = chessBoard.board[y][x];
               bool isSelected =
                   gameController.isPieceSelected(x, y); // 선택된 말 여부 확인
+              bool isPossibleMove =
+                  gameController.isPossibleMove(x, y); // 이동 가능 위치 여부 확인
 
               return GestureDetector(
                 onTap: () => onPieceTap(x, y),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: (x + y) % 2 == 0 ? Colors.white : Colors.grey,
+                    color: isPossibleMove
+                        ? Colors.greenAccent
+                        : (x + y) % 2 == 0
+                            ? Colors.white
+                            : Colors.grey,
                     border: Border.all(color: Colors.black),
                   ),
                   child: Center(
