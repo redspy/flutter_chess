@@ -40,6 +40,7 @@ class _ChessGamePageState extends State<ChessGamePage> {
       ),
       body: ChessBoardView(
         chessBoard: chessBoard,
+        gameController: gameController,
         onPieceTap: (x, y) {
           setState(() {
             gameController.onTap(x, y);

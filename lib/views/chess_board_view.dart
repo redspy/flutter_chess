@@ -1,41 +1,70 @@
 import 'package:flutter/material.dart';
 import '../models/chess_board.dart';
 import '../models/chess_piece.dart';
+import '../controllers/chess_game_controller.dart';
 
 class ChessBoardView extends StatelessWidget {
   final ChessBoard chessBoard;
+  final ChessGameController gameController;
   final Function(int x, int y) onPieceTap;
 
-  ChessBoardView({required this.chessBoard, required this.onPieceTap});
+  ChessBoardView(
+      {required this.chessBoard,
+      required this.gameController,
+      required this.onPieceTap});
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      gridDelegate:
-          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
-      itemBuilder: (context, index) {
-        int x = index % 8;
-        int y = index ~/ 8;
-        ChessPiece? piece = chessBoard.board[y][x]; // y, x 좌표 순서를 맞춰줍니다.
-        return GestureDetector(
-          onTap: () => onPieceTap(x, y),
-          child: Container(
-            decoration: BoxDecoration(
-              color: (x + y) % 2 == 0 ? Colors.white : Colors.grey,
-              border: Border.all(color: Colors.black),
-            ),
-            child: Center(
-              child: piece != null
-                  ? Text(
-                      piece.symbol, // 체스말 이모티콘으로 표시
-                      style: TextStyle(fontSize: 36),
-                    )
-                  : Container(),
-            ),
+    return Column(
+      children: [
+        Expanded(
+          child: GridView.builder(
+            gridDelegate:
+                SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
+            itemBuilder: (context, index) {
+              int x = index % 8;
+              int y = index ~/ 8;
+              ChessPiece? piece = chessBoard.board[y][x];
+              bool isSelected =
+                  gameController.isPieceSelected(x, y); // 선택된 말 여부 확인
+
+              return GestureDetector(
+                onTap: () => onPieceTap(x, y),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: (x + y) % 2 == 0 ? Colors.white : Colors.grey,
+                    border: Border.all(color: Colors.black),
+                  ),
+                  child: Center(
+                    child: piece != null
+                        ? Text(
+                            piece.symbol,
+                            style: TextStyle(
+                              fontSize: 36,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal, // 선택된 말 강조
+                              color: piece.color == 'White'
+                                  ? Colors.black
+                                  : Colors.red, // 말 색상
+                            ),
+                          )
+                        : Container(),
+                  ),
+                ),
+              );
+            },
+            itemCount: 64,
           ),
-        );
-      },
-      itemCount: 64,
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            '${gameController.currentTurn}의 순서 입니다.', // 현재 턴 표시
+            style: TextStyle(fontSize: 20),
+          ),
+        ),
+      ],
     );
   }
 }
