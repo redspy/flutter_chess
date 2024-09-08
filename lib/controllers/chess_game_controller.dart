@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import '../models/chess_board.dart';
-import '../models/chess_piece.dart'; // ChessPiece import 추가
+import '../models/chess_piece.dart';
+import '../views/promotion_dialog.dart'; // 프로모션 다이얼로그 import 추가
 
 class ChessGameController {
   ChessBoard chessBoard;
@@ -8,11 +10,30 @@ class ChessGameController {
   int? selectedY;
   List<List<int>> possibleMoves = [];
   List<int>? enPassantTarget; // 앙파상 타겟 위치 추적
+  late BuildContext context; // BuildContext 추가
 
   ChessGameController(this.chessBoard);
 
+  // 폰 프로모션 처리
+  Future<void> _promotePawn(int x, int y, String color) async {
+    String? selectedPiece = await showDialog<String>(
+      context: context,
+      barrierDismissible: false, // 팝업을 닫기 전까지 화면을 사용할 수 없도록 설정
+      builder: (BuildContext context) {
+        return PromotionDialog(color: color);
+      },
+    );
+
+    // 선택된 말이 있는 경우 말 교체
+    if (selectedPiece != null) {
+      chessBoard.board[y][x] = ChessPiece(selectedPiece, color);
+      // UI 갱신을 위해 setState를 호출해야 할 수 있음
+      (context as Element).markNeedsBuild(); // UI가 즉시 갱신되도록 처리
+    }
+  }
+
   // 말 선택 및 이동 로직
-  void onTap(int x, int y) {
+  void onTap(int x, int y) async {
     ChessPiece? piece = chessBoard.board[y][x];
 
     // 선택된 말을 다시 선택하면 선택을 취소
@@ -37,17 +58,24 @@ class ChessGameController {
           // 말 이동
           chessBoard.movePiece(selectedX!, selectedY!, x, y);
 
-          // 첫 이동 처리: 폰이 첫 이동을 마쳤으므로 hasMoved를 true로 설정
-          ChessPiece? selectedPiece = chessBoard.board[y][x];
-          if (selectedPiece != null) {
-            selectedPiece.hasMoved = true;
-          }
+          // 이동 후의 말 가져오기
+          ChessPiece? movedPiece = chessBoard.board[y][x];
 
-          // 앙파상 타겟 설정 (폰이 두 칸 이동한 경우)
-          if (selectedPiece?.type == 'Pawn' && (selectedY! - y).abs() == 2) {
-            enPassantTarget = [x, y + ((currentTurn == 'White') ? 1 : -1)];
-          } else {
-            enPassantTarget = null;
+          if (movedPiece != null) {
+            // 첫 이동 처리: 폰이 첫 이동을 마쳤으므로 hasMoved를 true로 설정
+            movedPiece.hasMoved = true;
+
+            // 앙파상 타겟 설정 (폰이 두 칸 이동한 경우)
+            if (movedPiece.type == 'Pawn' && (selectedY! - y).abs() == 2) {
+              enPassantTarget = [x, y + ((currentTurn == 'White') ? 1 : -1)];
+            } else {
+              enPassantTarget = null;
+            }
+
+            // 폰 프로모션: 폰이 끝에 도달하면 승격
+            if (movedPiece.type == 'Pawn' && (y == 0 || y == 7)) {
+              await _promotePawn(x, y, movedPiece.color); // 비동기적으로 팝업 띄우기
+            }
           }
 
           _clearSelection();

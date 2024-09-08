@@ -15,6 +15,9 @@ class ChessBoardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 게임 컨트롤러에 BuildContext 전달
+    gameController.context = context;
+
     return Column(
       children: [
         Expanded(
