@@ -33,6 +33,11 @@ class _ChessHomePageState extends State<ChessHomePage> {
   @override
   void initState() {
     super.initState();
+    _initializeGame();
+  }
+
+  // 게임을 초기화하는 함수
+  void _initializeGame() {
     _chessBoard = ChessBoard(); // 체스 보드 초기화
     _gameController = ChessGameController(_chessBoard); // 게임 컨트롤러 초기화
   }
@@ -54,9 +59,7 @@ class _ChessHomePageState extends State<ChessHomePage> {
             icon: Icon(Icons.refresh),
             onPressed: () {
               setState(() {
-                _chessBoard = ChessBoard(); // 새 체스판 초기화
-                _gameController =
-                    ChessGameController(_chessBoard); // 새로운 게임 컨트롤러 초기화
+                _initializeGame(); // 리셋 버튼 눌렀을 때 게임을 초기화
               });
             },
           ),

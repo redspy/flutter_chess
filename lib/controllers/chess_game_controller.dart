@@ -10,8 +10,8 @@ class ChessGameController {
   int? selectedX;
   int? selectedY;
   List<List<int>> possibleMoves = [];
-  List<int>? enPassantTarget; // 앙파상 타겟 위치 추적
-  late BuildContext context; // BuildContext를 추가
+  List<int>? enPassantTarget;
+  late BuildContext context;
   late Function(String) showEventMessage;
 
   // 제거된 말 리스트
@@ -168,9 +168,9 @@ class ChessGameController {
           if (capturedPiece != null && capturedPiece.color != currentTurn) {
             // 잡힌 말을 리스트에 추가
             if (capturedPiece.color == 'White') {
-              whiteCapturedPieces.add(capturedPiece);
-            } else {
               blackCapturedPieces.add(capturedPiece);
+            } else {
+              whiteCapturedPieces.add(capturedPiece);
             }
           }
 
@@ -211,13 +211,104 @@ class ChessGameController {
               await _promotePawn(x, y, movedPiece.color);
             }
           }
+          // 체크 및 체크메이트 검사
+          if (isCheck(currentTurn == 'White' ? 'Black' : 'White')) {
+            _showPopupMessage(
+                '체크! ${currentTurn == 'White' ? 'Black' : 'White'}의 왕이 공격받고 있습니다!');
+          }
 
           _clearSelection();
-          currentTurn = (currentTurn == 'White') ? 'Black' : 'White';
+          if (isNotKingAlive('White')) {
+            _showPopupMessage('종료! 흑 승리');
+          } else if (isNotKingAlive('Black')) {
+            _showPopupMessage('종료! 백 승리');
+          } else {
+            currentTurn = (currentTurn == 'White') ? 'Black' : 'White';
+          }
+
           break;
         }
       }
     }
+  }
+
+  bool isNotKingAlive(String color) {
+    List<int>? kingPosition = chessBoard.findKingPosition(color);
+    if (kingPosition == null) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+// 체크 여부 확인
+  bool isCheck(String color) {
+    // 체스판에서 왕의 위치 찾기
+    List<int>? kingPosition = chessBoard.findKingPosition(color);
+    if (kingPosition == null) return false;
+
+    // 상대방의 말이 왕을 공격할 수 있는지 확인
+    String opponentColor = (color == 'White') ? 'Black' : 'White';
+    for (int y = 0; y < 8; y++) {
+      for (int x = 0; x < 8; x++) {
+        ChessPiece? piece = chessBoard.board[y][x];
+        if (piece != null && piece.color == opponentColor) {
+          List<List<int>> opponentMoves =
+              piece.getPossibleMoves(x, y, chessBoard.board);
+          for (var move in opponentMoves) {
+            if (move[0] == kingPosition[0] && move[1] == kingPosition[1]) {
+              return true; // 왕이 공격받는 중
+            }
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  // 체크메이트 여부 확인
+  bool isCheckMate(String color) {
+    if (!isCheck(color)) return false; // 체크가 아니면 체크메이트 아님
+
+    // 체크된 플레이어가 모든 가능한 수를 둬도 체크를 피할 수 없는 경우 체크메이트
+    for (int y = 0; y < 8; y++) {
+      for (int x = 0; x < 8; x++) {
+        ChessPiece? piece = chessBoard.board[y][x];
+        if (piece != null && piece.color == color) {
+          List<List<int>> moves =
+              piece.getPossibleMoves(x, y, chessBoard.board);
+          for (var move in moves) {
+            ChessBoard tempBoard = chessBoard.clone(); // 체스판 복사
+            tempBoard.movePiece(x, y, move[0], move[1]);
+            if (!isCheck(color)) {
+              return false; // 체크를 피할 수 있는 수가 있음
+            }
+          }
+        }
+      }
+    }
+    return true; // 체크를 피할 수 있는 수가 없음
+  }
+
+  // 팝업 메시지를 띄우는 함수
+  void _showPopupMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('알림'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _clearSelection() {
