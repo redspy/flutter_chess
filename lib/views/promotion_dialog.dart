@@ -3,39 +3,60 @@ import 'package:flutter/material.dart';
 class PromotionDialog extends StatelessWidget {
   final String color;
 
-  const PromotionDialog({required this.color});
+  PromotionDialog({required this.color});
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('승격할 말을 선택하세요'),
-      content: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      title: Text('폰 프로모션'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _promotionOption(
-              context, 'Queen', 'assets/${color.toLowerCase()}_queen.png'),
-          _promotionOption(
-              context, 'Rook', 'assets/${color.toLowerCase()}_rook.png'),
-          _promotionOption(
-              context, 'Bishop', 'assets/${color.toLowerCase()}_bishop.png'),
-          _promotionOption(
-              context, 'Knight', 'assets/${color.toLowerCase()}_knight.png'),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop('Queen'); // 퀸으로 프로모션
+            },
+            child: _buildPromotionOption('assets/${color}_queen.png', '퀸'),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop('Rook'); // 룩으로 프로모션
+            },
+            child: _buildPromotionOption('assets/${color}_rook.png', '룩'),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop('Bishop'); // 비숍으로 프로모션
+            },
+            child: _buildPromotionOption('assets/${color}_bishop.png', '비숍'),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop('Knight'); // 나이트로 프로모션
+            },
+            child: _buildPromotionOption('assets/${color}_knight.png', '나이트'),
+          ),
         ],
       ),
+      actions: [
+        TextButton(
+          child: Text('취소'),
+          onPressed: () {
+            Navigator.of(context).pop(); // 다이얼로그 닫기
+          },
+        ),
+      ],
     );
   }
 
-  Widget _promotionOption(
-      BuildContext context, String piece, String imagePath) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).pop(piece); // 선택한 말의 타입을 반환
-      },
-      child: Image.asset(
-        imagePath,
-        width: 50,
-        height: 50,
-      ),
+  // 프로모션 선택 옵션을 위한 위젯
+  Widget _buildPromotionOption(String imagePath, String label) {
+    return Row(
+      children: [
+        Image.asset(imagePath, width: 40, height: 40),
+        SizedBox(width: 10),
+        Text(label, style: TextStyle(fontSize: 18)),
+      ],
     );
   }
 }
