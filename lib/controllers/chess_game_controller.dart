@@ -73,8 +73,16 @@ class ChessGameController {
               int targetX = enPassantTarget![0];
               int targetY = enPassantTarget![1];
               if (x == targetX && y == targetY) {
-                chessBoard.board[targetY - ((currentTurn == 'White') ? 1 : -1)]
-                    [targetX] = null;
+                if (movedPiece.color == 'White') {
+                  whiteCapturedPieces
+                      .add(chessBoard.board[targetY + 1][targetX]!);
+                  chessBoard.board[targetY + 1][targetX] = null;
+                } else {
+                  blackCapturedPieces
+                      .add(chessBoard.board[targetY - 1][targetX]!);
+                  chessBoard.board[targetY - 1][targetX] = null;
+                }
+
                 showEventMessage('앙파상 이벤트가 발동하였습니다.');
               }
             }
