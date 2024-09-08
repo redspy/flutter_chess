@@ -9,9 +9,13 @@ class ChessGameController {
   int? selectedX;
   int? selectedY;
   List<List<int>> possibleMoves = [];
-  List<int>? enPassantTarget; // 앙파상 타겟 위치 추적
-  late BuildContext context; // BuildContext를 추가
+  List<int>? enPassantTarget;
+  late BuildContext context;
   late Function(String) showEventMessage;
+
+  // 제거된 말 리스트
+  List<ChessPiece> whiteCapturedPieces = [];
+  List<ChessPiece> blackCapturedPieces = [];
 
   ChessGameController(this.chessBoard);
 
@@ -48,9 +52,17 @@ class ChessGameController {
     } else {
       for (List<int> move in possibleMoves) {
         if (move[0] == x && move[1] == y) {
-          // 말 이동
-          chessBoard.movePiece(selectedX!, selectedY!, x, y);
+          ChessPiece? capturedPiece = chessBoard.board[y][x];
+          if (capturedPiece != null && capturedPiece.color != currentTurn) {
+            // 잡힌 말을 리스트에 추가
+            if (capturedPiece.color == 'White') {
+              whiteCapturedPieces.add(capturedPiece);
+            } else {
+              blackCapturedPieces.add(capturedPiece);
+            }
+          }
 
+          chessBoard.movePiece(selectedX!, selectedY!, x, y);
           ChessPiece? movedPiece = chessBoard.board[y][x];
 
           if (movedPiece != null) {
@@ -61,7 +73,6 @@ class ChessGameController {
               int targetX = enPassantTarget![0];
               int targetY = enPassantTarget![1];
               if (x == targetX && y == targetY) {
-                // 상대의 폰 제거
                 chessBoard.board[targetY - ((currentTurn == 'White') ? 1 : -1)]
                     [targetX] = null;
                 showEventMessage('앙파상 이벤트가 발동하였습니다.');

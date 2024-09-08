@@ -7,11 +7,16 @@ class ChessBoardView extends StatefulWidget {
   final ChessBoard chessBoard;
   final ChessGameController gameController;
   final Function(int x, int y) onPieceTap;
+  final List<ChessPiece> whiteCapturedPieces; // 백의 제거된 말 리스트
+  final List<ChessPiece> blackCapturedPieces; // 흑의 제거된 말 리스트
 
-  ChessBoardView(
-      {required this.chessBoard,
-      required this.gameController,
-      required this.onPieceTap});
+  ChessBoardView({
+    required this.chessBoard,
+    required this.gameController,
+    required this.onPieceTap,
+    required this.whiteCapturedPieces,
+    required this.blackCapturedPieces,
+  });
 
   @override
   _ChessBoardViewState createState() => _ChessBoardViewState();
@@ -23,9 +28,8 @@ class _ChessBoardViewState extends State<ChessBoardView> {
   @override
   void initState() {
     super.initState();
-    // ChessGameController에 showEventMessage 콜백을 초기화
     widget.gameController.showEventMessage = _showEventMessage;
-    widget.gameController.context = context; // BuildContext 초기화
+    widget.gameController.context = context;
   }
 
   // 이벤트 메시지를 표시하는 함수
@@ -46,6 +50,7 @@ class _ChessBoardViewState extends State<ChessBoardView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // 체스판 그리드
         Expanded(
           child: GridView.builder(
             gridDelegate:
@@ -84,6 +89,8 @@ class _ChessBoardViewState extends State<ChessBoardView> {
             itemCount: 64,
           ),
         ),
+
+        // 이벤트 메시지 표시
         if (eventMessage != null)
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -92,11 +99,80 @@ class _ChessBoardViewState extends State<ChessBoardView> {
               style: TextStyle(fontSize: 18, color: Colors.redAccent),
             ),
           ),
+
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
             '${widget.gameController.currentTurn}의 순서입니다.',
             style: TextStyle(fontSize: 20),
+          ),
+        ),
+
+        // 흑과 백의 제거된 말 리스트를 표 형식으로 표시 (제거된 말 모두 표현)
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              // 흑의 제거된 말 리스트 (좌측에 "흑" 표시)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      '흑',
+                      textAlign: TextAlign.center,
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Expanded(
+                    child: Wrap(
+                      alignment: WrapAlignment.start,
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: widget.blackCapturedPieces
+                          .map((piece) => Image.asset(
+                                piece.imagePath,
+                                width: 30,
+                                height: 30,
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              // 백의 제거된 말 리스트 (좌측에 "백" 표시)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      '백',
+                      textAlign: TextAlign.center,
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Expanded(
+                    child: Wrap(
+                      alignment: WrapAlignment.start,
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: widget.whiteCapturedPieces
+                          .map((piece) => Image.asset(
+                                piece.imagePath,
+                                width: 30,
+                                height: 30,
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ],
