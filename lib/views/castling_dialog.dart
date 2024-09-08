@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
 
 class CastlingDialog extends StatelessWidget {
-  final List<List<int>> possibleMoves; // 캐슬링 가능한 이동 경로 리스트
-  final List<int> currentKingPosition; // 현재 왕의 위치
-  final List<int> currentRookPosition; // 현재 룩의 위치
-  final String kingColor; // 왕의 색 (백 또는 흑)
+  final List<List<int>> possibleMoves;
+  final String kingColor; // 색상에 따라 다이얼로그 스타일을 다르게 할 수 있음
 
-  CastlingDialog({
-    required this.possibleMoves,
-    required this.currentKingPosition,
-    required this.currentRookPosition,
-    required this.kingColor,
-  });
+  CastlingDialog({required this.possibleMoves, required this.kingColor});
 
   @override
   Widget build(BuildContext context) {

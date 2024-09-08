@@ -7,8 +7,8 @@ class ChessBoardView extends StatefulWidget {
   final ChessBoard chessBoard;
   final ChessGameController gameController;
   final Function(int x, int y) onPieceTap;
-  final List<ChessPiece> whiteCapturedPieces;
-  final List<ChessPiece> blackCapturedPieces;
+  final List<ChessPiece> whiteCapturedPieces; // 백의 제거된 말 리스트
+  final List<ChessPiece> blackCapturedPieces; // 흑의 제거된 말 리스트
 
   ChessBoardView({
     required this.chessBoard,
@@ -50,12 +50,11 @@ class _ChessBoardViewState extends State<ChessBoardView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // 체스판
+        // 체스판을 Expanded로 감싸 화면 크기에 맞게 조정
         Expanded(
           child: GridView.builder(
             gridDelegate:
                 SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
-            itemCount: 64,
             itemBuilder: (context, index) {
               int x = index % 8;
               int y = index ~/ 8;
@@ -87,11 +86,12 @@ class _ChessBoardViewState extends State<ChessBoardView> {
                 ),
               );
             },
-            physics: NeverScrollableScrollPhysics(),
+            itemCount: 64,
+            physics: NeverScrollableScrollPhysics(), // 스크롤 방지
           ),
         ),
 
-        // 이벤트 메시지
+        // 이벤트 메시지 표시
         if (eventMessage != null)
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -109,49 +109,74 @@ class _ChessBoardViewState extends State<ChessBoardView> {
           ),
         ),
 
-        // 제거된 말 리스트
+        // 흑과 백의 제거된 말 리스트를 표 형식으로 표시 (제거된 말 모두 표현)
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: SingleChildScrollView(
+            // 스크롤 가능하게 수정
             child: Column(
               children: [
-                _buildCapturedPiecesRow('흑', widget.blackCapturedPieces),
+                // 흑의 제거된 말 리스트 (좌측에 "흑" 표시)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        '흑',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Expanded(
+                      child: Wrap(
+                        alignment: WrapAlignment.start,
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: widget.blackCapturedPieces
+                            .map((piece) => Image.asset(
+                                  piece.imagePath,
+                                  width: 30,
+                                  height: 30,
+                                ))
+                            .toList(),
+                      ),
+                    ),
+                  ],
+                ),
                 SizedBox(height: 8),
-                _buildCapturedPiecesRow('백', widget.whiteCapturedPieces),
+                // 백의 제거된 말 리스트 (좌측에 "백" 표시)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        '백',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Expanded(
+                      child: Wrap(
+                        alignment: WrapAlignment.start,
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: widget.whiteCapturedPieces
+                            .map((piece) => Image.asset(
+                                  piece.imagePath,
+                                  width: 30,
+                                  height: 30,
+                                ))
+                            .toList(),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // 흑과 백의 제거된 말 리스트를 생성하는 함수
-  Widget _buildCapturedPiecesRow(
-      String title, List<ChessPiece> capturedPieces) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-        ),
-        Expanded(
-          child: Wrap(
-            alignment: WrapAlignment.start,
-            spacing: 4,
-            runSpacing: 4,
-            children: capturedPieces
-                .map((piece) => Image.asset(
-                      piece.imagePath,
-                      width: 30,
-                      height: 30,
-                    ))
-                .toList(),
           ),
         ),
       ],
