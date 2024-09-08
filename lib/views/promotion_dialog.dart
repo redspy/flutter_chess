@@ -16,25 +16,29 @@ class PromotionDialog extends StatelessWidget {
             onTap: () {
               Navigator.of(context).pop('Queen'); // 퀸으로 프로모션
             },
-            child: _buildPromotionOption('assets/${color}_queen.png', '퀸'),
+            child: _buildPromotionOption(
+                'assets/${color}_queen.png'.toLowerCase(), '퀸'),
           ),
           GestureDetector(
             onTap: () {
               Navigator.of(context).pop('Rook'); // 룩으로 프로모션
             },
-            child: _buildPromotionOption('assets/${color}_rook.png', '룩'),
+            child: _buildPromotionOption(
+                'assets/${color}_rook.png'.toLowerCase(), '룩'),
           ),
           GestureDetector(
             onTap: () {
               Navigator.of(context).pop('Bishop'); // 비숍으로 프로모션
             },
-            child: _buildPromotionOption('assets/${color}_bishop.png', '비숍'),
+            child: _buildPromotionOption(
+                'assets/${color}_bishop.png'.toLowerCase(), '비숍'),
           ),
           GestureDetector(
             onTap: () {
               Navigator.of(context).pop('Knight'); // 나이트로 프로모션
             },
-            child: _buildPromotionOption('assets/${color}_knight.png', '나이트'),
+            child: _buildPromotionOption(
+                'assets/${color}_knight.png'.toLowerCase(), '나이트'),
           ),
         ],
       ),
