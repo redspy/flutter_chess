@@ -76,28 +76,28 @@ class ChessPiece {
       [Map<String, dynamic>? options]) {
     int direction = (color == 'White') ? -1 : 1;
     bool isFirstMove = !hasMoved;
+    try {
+      if (board[y + direction][x] == null) {
+        moves.add([x, y + direction]);
+      }
 
-    if (board[y + direction][x] == null) {
-      moves.add([x, y + direction]);
-    }
+      if (isFirstMove &&
+          board[y + direction * 2][x] == null &&
+          board[y + direction][x] == null) {
+        moves.add([x, y + direction * 2]);
+      }
 
-    if (isFirstMove &&
-        board[y + direction * 2][x] == null &&
-        board[y + direction][x] == null) {
-      moves.add([x, y + direction * 2]);
-    }
-
-    if (x > 0 &&
-        board[y + direction][x - 1]?.color != color &&
-        board[y + direction][x - 1] != null) {
-      moves.add([x - 1, y + direction]);
-    }
-    if (x < 7 &&
-        board[y + direction][x + 1]?.color != color &&
-        board[y + direction][x + 1] != null) {
-      moves.add([x + 1, y + direction]);
-    }
-
+      if (x > 0 &&
+          board[y + direction][x - 1]?.color != color &&
+          board[y + direction][x - 1] != null) {
+        moves.add([x - 1, y + direction]);
+      }
+      if (x < 7 &&
+          board[y + direction][x + 1]?.color != color &&
+          board[y + direction][x + 1] != null) {
+        moves.add([x + 1, y + direction]);
+      }
+    } catch (e) {}
     if (options != null &&
         options.containsKey('enPassant') &&
         options['enPassant'] != null) {

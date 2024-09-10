@@ -3,6 +3,8 @@ import '../models/chess_board.dart';
 import '../models/chess_piece.dart';
 import '../views/promotion_dialog.dart';
 import '../views/castling_dialog.dart';
+import '../AI/ChessAI.dart';
+import '../AI/move.dart';
 import 'dart:math';
 
 class ChessGameController {
@@ -14,156 +16,26 @@ class ChessGameController {
   List<int>? enPassantTarget;
   late BuildContext context;
   late Function(String) showEventMessage;
+  late ChessAI ai;
 
   // 제거된 말 리스트
   List<ChessPiece> whiteCapturedPieces = [];
   List<ChessPiece> blackCapturedPieces = [];
 
-  ChessGameController(this.chessBoard);
+  ChessGameController(this.chessBoard) {
+    ai = ChessAI(chessBoard);
+  }
 
-  // 흑의 턴에서 자동으로 AI가 움직이도록 설정 (미니맥스 및 알파-베타 가지치기 사용)
-  // 흑의 턴에서 AI가 움직임 (미니맥스와 알파-베타 가지치기 사용)
+  // 흑의 턴에서 AI가 움직임
   void runAITurn(BuildContext context) {
     if (currentTurn == 'Black') {
-      _minimaxMove(4, double.negativeInfinity, double.infinity, false,
-          context); // 깊이 4 설정
-      currentTurn = 'White';
-    }
-  }
-
-  // 미니맥스 알고리즘 (알파-베타 가지치기 포함)
-  double _minimaxMove(int depth, double alpha, double beta,
-      bool isMaximizingPlayer, BuildContext context) {
-    if (depth == 0 || _isGameOver()) {
-      return _evaluateBoard(); // 평가 함수 호출
-    }
-
-    if (isMaximizingPlayer) {
-      double maxEval = double.negativeInfinity;
-      List<Move> moves = _getAllPossibleMoves('White');
-      for (Move move in moves) {
-        ChessBoard tempBoard = chessBoard.clone();
-        tempBoard.movePiece(move.fromX, move.fromY, move.toX, move.toY);
-        double eval = _minimaxMove(depth - 1, alpha, beta, false, context);
-        maxEval = max(maxEval, eval);
-        alpha = max(alpha, eval);
-        if (beta <= alpha) {
-          break; // 베타 컷
-        }
-      }
-      return maxEval;
-    } else {
-      double minEval = double.infinity;
-      List<Move> moves = _getAllPossibleMoves('Black');
-      Move? bestMove;
-      for (Move move in moves) {
-        ChessBoard tempBoard = chessBoard.clone();
-        tempBoard.movePiece(move.fromX, move.fromY, move.toX, move.toY);
-        double eval = _minimaxMove(depth - 1, alpha, beta, true, context);
-        if (eval < minEval) {
-          minEval = eval;
-          bestMove = move;
-        }
-        beta = min(beta, eval);
-        if (beta <= alpha) {
-          break; // 알파 컷
-        }
-      }
-      if (depth == 4 && bestMove != null) {
-        // 흑의 최적 수를 실제로 수행
+      Move? bestMove = ai.findBestMove('Black') as Move?;
+      if (bestMove != null) {
         chessBoard.movePiece(
             bestMove.fromX, bestMove.fromY, bestMove.toX, bestMove.toY);
-        if (chessBoard.board[bestMove.toY][bestMove.toX]?.type == 'Pawn' &&
-            (bestMove.toY == 0 || bestMove.toY == 7)) {
-          // 폰 프로모션 처리
-          _promotePawn(bestMove.toX, bestMove.toY, 'Black');
-        }
-      }
-      return minEval;
-    }
-  }
-
-  // 체스판 평가 함수 개선 (위치, 말의 안전성, 킹의 안전성 포함)
-  double _evaluateBoard() {
-    double score = 0.0;
-    for (int y = 0; y < 8; y++) {
-      for (int x = 0; x < 8; x++) {
-        ChessPiece? piece = chessBoard.board[y][x];
-        if (piece != null) {
-          double pieceValue = _getPieceValue(piece, x, y);
-          score += piece.color == 'White' ? pieceValue : -pieceValue;
-        }
+        currentTurn = 'White';
       }
     }
-    return score;
-  }
-
-  // 말의 가치를 계산하는 함수 (위치 및 안전성 고려)
-  double _getPieceValue(ChessPiece piece, int x, int y) {
-    double baseValue;
-    switch (piece.type) {
-      case 'Pawn':
-        baseValue = 1.0;
-        break;
-      case 'Knight':
-        baseValue = 3.0;
-        break;
-      case 'Bishop':
-        baseValue = 3.3;
-        break;
-      case 'Rook':
-        baseValue = 5.0;
-        break;
-      case 'Queen':
-        baseValue = 9.0;
-        break;
-      case 'King':
-        baseValue = 100.0;
-        break;
-      default:
-        baseValue = 0.0;
-    }
-
-    // 위치 기반 보정 (폰의 전진, 중앙 통제력, 킹의 안전성 등)
-    double positionValue = _getPositionValue(piece, x, y);
-    return baseValue + positionValue;
-  }
-
-  // 말의 위치에 따른 보정 (예: 폰이 중앙에 있을 때 더 높은 가치를 가짐)
-  double _getPositionValue(ChessPiece piece, int x, int y) {
-    // 간단한 위치 평가: 중앙에 가까울수록 더 높은 점수
-    double centrality = 0.5 * (4 - (x - 3.5).abs()) * (4 - (y - 3.5).abs());
-    if (piece.type == 'Pawn') {
-      // 폰은 전진할수록 가치가 높아짐
-      return piece.color == 'White'
-          ? (y * 0.1 + centrality)
-          : ((7 - y) * 0.1 + centrality);
-    }
-    return centrality;
-  }
-
-  // 게임 종료 여부 확인
-  bool _isGameOver() {
-    return _getAllPossibleMoves('White').isEmpty ||
-        _getAllPossibleMoves('Black').isEmpty;
-  }
-
-  // 모든 가능한 이동 수를 반환하는 함수
-  List<Move> _getAllPossibleMoves(String color) {
-    List<Move> moves = [];
-    for (int y = 0; y < 8; y++) {
-      for (int x = 0; x < 8; x++) {
-        ChessPiece? piece = chessBoard.board[y][x];
-        if (piece != null && piece.color == color) {
-          List<List<int>> possibleMoves =
-              piece.getPossibleMoves(x, y, chessBoard.board);
-          for (List<int> move in possibleMoves) {
-            moves.add(Move(x, y, move[0], move[1]));
-          }
-        }
-      }
-    }
-    return moves;
   }
 
   Future<void> _promotePawn(int x, int y, String color) async {
@@ -478,14 +350,4 @@ class ChessGameController {
     }
     return false;
   }
-}
-
-// Move 클래스: 말의 이동을 나타냄
-class Move {
-  final int fromX;
-  final int fromY;
-  final int toX;
-  final int toY;
-
-  Move(this.fromX, this.fromY, this.toX, this.toY);
 }
