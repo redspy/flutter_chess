@@ -22,10 +22,11 @@ class ChessGameController {
   ChessGameController(this.chessBoard);
 
   // 흑의 턴에서 자동으로 AI가 움직이도록 설정 (미니맥스 및 알파-베타 가지치기 사용)
+  // 흑의 턴에서 AI가 움직임 (미니맥스와 알파-베타 가지치기 사용)
   void runAITurn(BuildContext context) {
     if (currentTurn == 'Black') {
-      _minimaxMove(3, double.negativeInfinity, double.infinity, false,
-          context); // 깊이 3 설정
+      _minimaxMove(4, double.negativeInfinity, double.infinity, false,
+          context); // 깊이 4 설정
       currentTurn = 'White';
     }
   }
@@ -68,7 +69,7 @@ class ChessGameController {
           break; // 알파 컷
         }
       }
-      if (depth == 3 && bestMove != null) {
+      if (depth == 4 && bestMove != null) {
         // 흑의 최적 수를 실제로 수행
         chessBoard.movePiece(
             bestMove.fromX, bestMove.fromY, bestMove.toX, bestMove.toY);
@@ -82,14 +83,14 @@ class ChessGameController {
     }
   }
 
-  // 체스판 평가 함수 (기본적인 평가)
+  // 체스판 평가 함수 개선 (위치, 말의 안전성, 킹의 안전성 포함)
   double _evaluateBoard() {
     double score = 0.0;
     for (int y = 0; y < 8; y++) {
       for (int x = 0; x < 8; x++) {
         ChessPiece? piece = chessBoard.board[y][x];
         if (piece != null) {
-          double pieceValue = _getPieceValue(piece);
+          double pieceValue = _getPieceValue(piece, x, y);
           score += piece.color == 'White' ? pieceValue : -pieceValue;
         }
       }
@@ -97,24 +98,48 @@ class ChessGameController {
     return score;
   }
 
-  // 말의 가치를 계산하는 함수
-  double _getPieceValue(ChessPiece piece) {
+  // 말의 가치를 계산하는 함수 (위치 및 안전성 고려)
+  double _getPieceValue(ChessPiece piece, int x, int y) {
+    double baseValue;
     switch (piece.type) {
       case 'Pawn':
-        return 1.0;
+        baseValue = 1.0;
+        break;
       case 'Knight':
-        return 3.0;
+        baseValue = 3.0;
+        break;
       case 'Bishop':
-        return 3.0;
+        baseValue = 3.3;
+        break;
       case 'Rook':
-        return 5.0;
+        baseValue = 5.0;
+        break;
       case 'Queen':
-        return 9.0;
+        baseValue = 9.0;
+        break;
       case 'King':
-        return 100.0;
+        baseValue = 100.0;
+        break;
       default:
-        return 0.0;
+        baseValue = 0.0;
     }
+
+    // 위치 기반 보정 (폰의 전진, 중앙 통제력, 킹의 안전성 등)
+    double positionValue = _getPositionValue(piece, x, y);
+    return baseValue + positionValue;
+  }
+
+  // 말의 위치에 따른 보정 (예: 폰이 중앙에 있을 때 더 높은 가치를 가짐)
+  double _getPositionValue(ChessPiece piece, int x, int y) {
+    // 간단한 위치 평가: 중앙에 가까울수록 더 높은 점수
+    double centrality = 0.5 * (4 - (x - 3.5).abs()) * (4 - (y - 3.5).abs());
+    if (piece.type == 'Pawn') {
+      // 폰은 전진할수록 가치가 높아짐
+      return piece.color == 'White'
+          ? (y * 0.1 + centrality)
+          : ((7 - y) * 0.1 + centrality);
+    }
+    return centrality;
   }
 
   // 게임 종료 여부 확인
