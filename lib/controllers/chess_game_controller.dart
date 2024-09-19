@@ -17,12 +17,13 @@ class ChessGameController {
   late BuildContext context;
   late Function(String) showEventMessage;
   late ChessAI ai;
+  final bool isVsAI;
 
   // 제거된 말 리스트
   List<ChessPiece> whiteCapturedPieces = [];
   List<ChessPiece> blackCapturedPieces = [];
 
-  ChessGameController(this.chessBoard) {
+  ChessGameController(this.chessBoard, {required this.isVsAI}) {
     ai = ChessAI(chessBoard);
   }
 
@@ -242,8 +243,8 @@ class ChessGameController {
             _showPopupMessage('종료! 백 승리');
           } else {
             currentTurn = (currentTurn == 'White') ? 'Black' : 'White';
-            if (currentTurn == 'Black') {
-              runAITurn(context); // 흑의 턴에 AI 실행
+            if (currentTurn == 'Black' && isVsAI) {
+              runAITurn(context); // AI 모드일 때만 흑의 턴에 AI 실행
             }
           }
 
