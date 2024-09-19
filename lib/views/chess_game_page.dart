@@ -32,7 +32,8 @@ class _ChessGamePageState extends State<ChessGamePage> {
   // 체스판에서 말을 선택했을 때 호출되는 함수
   void _onPieceTap(int x, int y) {
     setState(() {
-      _gameController.onTap(x, y); // 말 이동 처리
+      _gameController.onTap(
+          x, y, context, () => setState(() {})); // 말 이동 처리 후 UI 업데이트
     });
   }
 

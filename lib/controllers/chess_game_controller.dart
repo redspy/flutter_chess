@@ -27,14 +27,16 @@ class ChessGameController {
     ai = ChessAI(chessBoard);
   }
 
-  // 흑의 턴에서 AI가 움직임
-  void runAITurn(BuildContext context) {
-    if (currentTurn == 'Black') {
-      Move? bestMove = ai.findBestMove('Black') as Move?;
+  Future<void> runAITurn(BuildContext context, Function updateUI) async {
+    if (currentTurn == 'Black' && isVsAI) {
+      // AI 동작을 약간 지연시켜서 UI가 먼저 업데이트되도록 함
+      await Future.delayed(Duration(milliseconds: 500)); // 0.5초 딜레이
+      Move? bestMove = ai.findBestMove('Black');
       if (bestMove != null) {
         chessBoard.movePiece(
             bestMove.fromX, bestMove.fromY, bestMove.toX, bestMove.toY);
         currentTurn = 'White';
+        updateUI();
       }
     }
   }
@@ -154,7 +156,7 @@ class ChessGameController {
     return castlingMoves;
   }
 
-  void onTap(int x, int y) async {
+  void onTap(int x, int y, BuildContext context, Function updateUI) async {
     ChessPiece? piece = chessBoard.board[y][x];
 
     if (selectedX == x && selectedY == y) {
@@ -244,7 +246,7 @@ class ChessGameController {
           } else {
             currentTurn = (currentTurn == 'White') ? 'Black' : 'White';
             if (currentTurn == 'Black' && isVsAI) {
-              runAITurn(context); // AI 모드일 때만 흑의 턴에 AI 실행
+              Future.microtask(() => runAITurn(context, updateUI));
             }
           }
 
