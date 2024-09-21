@@ -5,7 +5,6 @@ import '../views/promotion_dialog.dart';
 import '../views/castling_dialog.dart';
 import '../AI/ChessAI.dart';
 import '../AI/move.dart';
-import 'dart:math';
 
 class ChessGameController {
   ChessBoard chessBoard;

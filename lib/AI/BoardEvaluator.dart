@@ -19,28 +19,20 @@ class BoardEvaluator {
 
   // 말의 가치를 계산하는 함수
   double _getPieceValue(ChessPiece piece, int x, int y) {
-    double baseValue;
     switch (piece.type) {
       case 'Pawn':
-        baseValue = 1.0;
         break;
       case 'Knight':
-        baseValue = 3.0;
         break;
       case 'Bishop':
-        baseValue = 3.3;
         break;
       case 'Rook':
-        baseValue = 5.0;
         break;
       case 'Queen':
-        baseValue = 9.0;
         break;
       case 'King':
-        baseValue = 100.0;
         break;
       default:
-        baseValue = 0.0;
     }
 
     double centrality = 0.5 * (4 - (x - 3.5).abs()) * (4 - (y - 3.5).abs());
